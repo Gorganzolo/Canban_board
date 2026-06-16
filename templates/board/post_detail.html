@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - MMORPG Board{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h2>{{ post.title }}</h2>
+        <span class="badge bg-secondary">{{ post.category.name }}</span>
+        <small class="text-muted ms-2">Автор: {{ post.author.email }} | {{ post.created_at|date:"d.m.Y H:i" }}</small>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ post.content|safe }}</p>
+    </div>
+    {% if user == post.author %}
+    <div class="card-footer">
+        <a href="{% url 'board:post_edit' post.pk %}" class="btn btn-primary btn-sm">Редактировать</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated and user != post.author %}
+    <div class="card mb-4">
+        <div class="card-body">
+            {% if user_has_replied %}
+                <p class="text-success">Вы уже оставили отклик на это объявление.</p>
+            {% else %}
+                <h4>Оставить отклик</h4>
+                <form method="post" action="{% url 'board:reply_create' post.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <textarea name="text" class="form-control" rows="3" required placeholder="Текст отклика..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Отправить отклик</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% elif not user.is_authenticated %}
+    <div class="alert alert-info">
+        Для того чтобы оставить отклик, пожалуйста, <a href="{% url 'account_login' %}">войдите</a> или <a href="{% url 'account_signup' %}">зарегистрируйтесь</a>.
+    </div>
+{% endif %}
+
+{% endblock %}

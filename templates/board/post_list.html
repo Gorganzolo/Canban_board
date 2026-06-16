@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Все объявления - MMORPG Board{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <h3>Категории</h3>
+        <div class="list-group">
+            <a href="{% url 'board:post_list' %}" class="list-group-item list-group-item-action {% if not request.GET.category %}active{% endif %}">Все</a>
+            {% for cat in categories %}
+                <a href="?category={{ cat.id }}" class="list-group-item list-group-item-action {% if request.GET.category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-9">
+        <h2>Объявления</h2>
+        {% for post in page_obj %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{% url 'board:post_detail' post.pk %}">{{ post.title }}</a></h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Категория: {{ post.category.name }} | Автор: {{ post.author.email }} | {{ post.created_at|date:"d.m.Y H:i" }}</h6>
+                </div>
+            </div>
+        {% empty %}
+            <p>Объявлений пока нет.</p>
+        {% endfor %}
+
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Назад</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Вперед</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

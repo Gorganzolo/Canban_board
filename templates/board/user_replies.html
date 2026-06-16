@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Отклики на мои объявления - MMORPG Board{% endblock %}
+
+{% block content %}
+<h2>Отклики на мои объявления</h2>
+
+<form method="get" class="mb-4 d-flex align-items-center">
+    <label for="postSelect" class="me-2">Фильтр по объявлению:</label>
+    <select name="post" id="postSelect" class="form-select w-auto me-2">
+        <option value="">Все объявления</option>
+        {% for p in my_posts %}
+            <option value="{{ p.id }}" {% if request.GET.post == p.id|stringformat:'s' %}selected{% endif %}>{{ p.title }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Применить</button>
+</form>
+
+{% for reply in replies %}
+    <div class="card mb-3 {% if reply.is_accepted %}border-success{% endif %}">
+        <div class="card-header">
+            <strong>Отклик от:</strong> {{ reply.author.email }}
+            <span class="text-muted ms-2">на объявление <a href="{% url 'board:post_detail' reply.post.pk %}">{{ reply.post.title }}</a> ({{ reply.created_at|date:"d.m.Y H:i" }})</span>
+            {% if reply.is_accepted %}
+                <span class="badge bg-success float-end">Принят</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ reply.text }}</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+            {% if not reply.is_accepted %}
+                <form method="post" action="{% url 'board:reply_accept' reply.pk %}" class="me-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">Принять</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{% url 'board:reply_delete' reply.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот отклик?');">Удалить</button>
+            </form>
+        </div>
+    </div>
+{% empty %}
+    <p>У вас пока нет откликов на ваши объявления.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои отправленные отклики - MMORPG Board{% endblock %}
+
+{% block content %}
+<h2>Мои отправленные отклики</h2>
+
+{% for reply in replies %}
+    <div class="card mb-3 {% if reply.is_accepted %}border-success{% endif %}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>
+                <strong>Объявление:</strong> <a href="{% url 'board:post_detail' reply.post.pk %}">{{ reply.post.title }}</a>
+                <small class="text-muted ms-2">({{ reply.created_at|date:"d.m.Y H:i" }})</small>
+            </span>
+            {% if reply.is_accepted %}
+                <span class="badge bg-success">Принят</span>
+            {% else %}
+                <span class="badge bg-secondary">На рассмотрении</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ reply.text }}</p>
+        </div>
+    </div>
+{% empty %}
+    <p>Вы пока не оставили ни одного отклика.</p>
+{% endfor %}
+
+{% endblock %}
